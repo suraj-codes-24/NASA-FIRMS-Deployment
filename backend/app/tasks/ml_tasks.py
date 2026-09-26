@@ -82,18 +82,20 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
         try:
             from gradio_client import Client
             import ast
+            import asyncio
             
             # Use the HF URL without any /api/predict suffixes for the client
             base_url = settings.huggingface_inference_url.replace('/api/predict', '').replace('/run/predict', '').replace('/gradio_api', '')
             
-            # Run inference synchronously in an async wrapper (or run in threadpool, but predict is blocking)
-            client = Client(base_url)
+            def run_inference():
+                client = Client(base_url)
+                return client.predict(
+                    features_json=json.dumps(features_list),
+                    api_name="/predict"
+                )
             
-            # predict returns the string of JSON directly
-            result_json_str = client.predict(
-                features_json=json.dumps(features_list),
-                api_name="/predict"
-            )
+            # Run inference synchronously in a threadpool so we don't block FastAPI
+            result_json_str = await asyncio.to_thread(run_inference)
             
             # The result is already a JSON string containing {"predictions": [...]}
             predictions = json.loads(result_json_str).get("predictions", [])
