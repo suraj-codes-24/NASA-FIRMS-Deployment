@@ -64,7 +64,7 @@ class Hotspot(Base):
     spread_rate = Column(Float, nullable=True)  # km/hr
     
     # ML Classification
-    ml_label = Column(SQLEnum(MLClassificationEnum), default=MLClassificationEnum.UNCLASSIFIED, index=True)
+    ml_label = Column(SQLEnum(MLClassificationEnum, values_callable=lambda obj: [e.value for e in obj]), default=MLClassificationEnum.UNCLASSIFIED, index=True)
     classification_confidence = Column(Float, nullable=True)
     is_user_verified = Column(Boolean, default=False)
     
@@ -84,7 +84,7 @@ class ClassificationLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     hotspot_id = Column(Integer, ForeignKey("hotspots.id"), nullable=False)
     model_version = Column(String, nullable=False)
-    predicted_label = Column(SQLEnum(MLClassificationEnum), nullable=False)
+    predicted_label = Column(SQLEnum(MLClassificationEnum, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
     probability_scores = Column(String, nullable=True) # JSON string of probs
     execution_time_ms = Column(Float, nullable=True)
     
@@ -110,8 +110,8 @@ class VerificationLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     hotspot_id = Column(Integer, ForeignKey("hotspots.id"), nullable=False)
-    original_label = Column(SQLEnum(MLClassificationEnum), nullable=False)
-    verified_label = Column(SQLEnum(MLClassificationEnum), nullable=False)
+    original_label = Column(SQLEnum(MLClassificationEnum, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
+    verified_label = Column(SQLEnum(MLClassificationEnum, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
     user_id = Column(String, nullable=True) # E.g., agent ID or email
     notes = Column(String, nullable=True)
     
