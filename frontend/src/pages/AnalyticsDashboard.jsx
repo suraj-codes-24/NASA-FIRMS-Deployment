@@ -11,7 +11,7 @@ const AnalyticsDashboard = () => {
     date_from: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     date_to: new Date().toISOString().split('T')[0],
     ml_label: '',
-    min_confidence: 75,
+    min_confidence: 0,
     region: 'global'
   });
 
