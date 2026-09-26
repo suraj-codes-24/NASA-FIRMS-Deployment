@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from app.config import settings
 from app.database import Base, async_engine, init_db
-from app.routers import map, alerts, settings as settings_router, auth, websocket
+from app.routers import hotspots, facilities, analytics, reports, alerts, settings as settings_router, auth, websocket
 from app.tasks.nasa_tasks import fetch_nasa_firms_data
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -42,7 +42,10 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(map.router, prefix="/api/v1/map", tags=["Map Data"])
+app.include_router(hotspots.router, prefix="/api/v1/hotspots", tags=["Hotspots"])
+app.include_router(facilities.router, prefix="/api/v1/facilities", tags=["Facilities"])
+app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
+app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(alerts.router, prefix="/api/v1/alerts", tags=["Alerts"])
 app.include_router(settings_router.router, prefix="/api/v1/settings", tags=["Settings"])
 app.include_router(websocket.router, tags=["WebSocket"])
