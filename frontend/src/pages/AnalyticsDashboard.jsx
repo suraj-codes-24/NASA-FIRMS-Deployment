@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Key } from 'lucide-react';
-import StatCards from '../components/analytics/StatCards';
-import FilterPanel from '../components/analytics/FilterPanel';
-import HeatMap from '../components/analytics/HeatMap';
-import RecentAlertsTimeline from '../components/analytics/RecentAlertsTimeline';
-import FrequencyChart from '../components/analytics/FrequencyChart';
+import StatCards from '../components/Analytics/StatCards';
+import FilterPanel from '../components/Analytics/FilterPanel';
+import HeatMap from '../components/Analytics/HeatMap';
+import RecentAlertsTimeline from '../components/Analytics/RecentAlertsTimeline';
+import FrequencyChart from '../components/Analytics/FrequencyChart';
 
 const AnalyticsDashboard = () => {
   const [filters, setFilters] = useState({

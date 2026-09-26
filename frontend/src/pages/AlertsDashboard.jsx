@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import AlertSeverityRow from '../components/alerts/AlertSeverityRow';
-import AlertsTable from '../components/alerts/AlertsTable';
-import AlertDetailPane from '../components/alerts/AlertDetailPane';
+import AlertSeverityRow from '../components/Alerts/AlertSeverityRow';
+import AlertsTable from '../components/Alerts/AlertsTable';
+import AlertDetailPane from '../components/Alerts/AlertDetailPane';
 import { fetchAlerts, acknowledgeAlert, resolveAlert, saveAlertNotes } from '../api';
 
 const AlertsDashboard = () => {
