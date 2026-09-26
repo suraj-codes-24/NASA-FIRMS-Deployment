@@ -80,3 +80,35 @@ async def trigger_ingestion(request: Request, background_tasks: BackgroundTasks)
     await verify_qstash_signature(request)
     background_tasks.add_task(fetch_nasa_firms_data)
     return {"status": "accepted", "message": "NASA FIRMS ingestion started in background"}
+
+
+async def _reclassify_unclassified():
+    """Reclassify all hotspots that are still UNCLASSIFIED."""
+    from app.database import SyncSessionLocal
+    from app.models.spatial import Hotspot, MLClassificationEnum
+    from app.tasks.ml_tasks import process_hotspots_batch
+    
+    with SyncSessionLocal() as db:
+        unclassified = db.query(Hotspot.id).filter(
+            Hotspot.ml_label == MLClassificationEnum.UNCLASSIFIED
+        ).all()
+        ids = [r[0] for r in unclassified]
+    
+    if not ids:
+        logger.info("No unclassified hotspots found.")
+        return
+    
+    logger.info(f"Reclassifying {len(ids)} unclassified hotspots...")
+    # Process in batches of 50
+    batch_size = 50
+    for i in range(0, len(ids), batch_size):
+        batch = ids[i:i+batch_size]
+        await process_hotspots_batch(batch)
+
+
+@app.post("/api/v1/cron/reclassify")
+async def trigger_reclassify(background_tasks: BackgroundTasks):
+    """Manually trigger ML reclassification for all unclassified hotspots."""
+    background_tasks.add_task(_reclassify_unclassified)
+    return {"status": "accepted", "message": "Reclassification started in background"}
+

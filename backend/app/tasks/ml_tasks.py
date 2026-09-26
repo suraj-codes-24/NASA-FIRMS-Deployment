@@ -1,7 +1,7 @@
 import logging
 import datetime
-import httpx
 import json
+import asyncio
 from sqlalchemy import select
 
 from app.database import SyncSessionLocal
@@ -14,7 +14,7 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
     """
     Process a batch of ingested hotspots:
     1. Spatial enrichment (distance to industry)
-    2. ML Classification via HuggingFace API call
+    2. ML Classification via HuggingFace Gradio API call
     3. Save results
     """
     start_time = datetime.datetime.utcnow()
@@ -33,13 +33,15 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
         "Unclassified": MLClassificationEnum.UNCLASSIFIED
     }
 
+    # --- PHASE 1: Build feature vectors (sync DB) ---
+    features_list = []
+    hotspot_data = []  # Store (id, index) for later update
+    
     with SyncSessionLocal() as db:
         hotspots = db.query(Hotspot).filter(Hotspot.id.in_(hotspot_ids)).all()
         if not hotspots:
             return True
             
-        features_list = []
-        
         for h in hotspots:
             query = select(Facility).order_by(
                 Facility.geom.distance_centroid(h.geom)
@@ -48,7 +50,7 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
             
             if nearest:
                 h.nearest_facility_id = nearest.id
-                h.dist_to_industry_m = 0.0 # Placeholder for haversine
+                h.dist_to_industry_m = 0.0
                 industrial_type = nearest.facility_type
             else:
                 h.dist_to_industry_m = 99999.0
@@ -77,38 +79,49 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
                 "land_cover_class": h.land_cover_class
             }
             features_list.append(feat)
+            hotspot_data.append(h.id)
             
-        # Call HuggingFace Gradio API
-        try:
-            from gradio_client import Client
-            import ast
-            import asyncio
-            
-            # Use the HF URL without any /api/predict suffixes for the client
-            base_url = settings.huggingface_inference_url.replace('/api/predict', '').replace('/run/predict', '').replace('/gradio_api', '')
-            
-            def run_inference():
-                client = Client(base_url)
-                return client.predict(
-                    features_json=json.dumps(features_list),
-                    api_name="/predict"
-                )
-            
-            # Run inference synchronously in a threadpool so we don't block FastAPI
-            result_json_str = await asyncio.to_thread(run_inference)
-            
-            # The result is already a JSON string containing {"predictions": [...]}
-            predictions = json.loads(result_json_str).get("predictions", [])
-                
-        except Exception as e:
-            logger.error(f"Error calling ML inference API: {e}")
-            return False
-            
-        end_time = datetime.datetime.utcnow()
-        exec_time = (end_time - start_time).total_seconds() * 1000.0
+        db.commit()  # Save the enrichment updates
+
+    # --- PHASE 2: Call HuggingFace (in a thread so we don't block the event loop) ---
+    try:
+        from gradio_client import Client
         
-        for i, h in enumerate(hotspots):
+        base_url = settings.huggingface_inference_url.replace('/api/predict', '').replace('/run/predict', '').replace('/gradio_api', '')
+        
+        def _run_inference():
+            logger.info(f"Connecting to Gradio API at {base_url} ...")
+            client = Client(base_url)
+            logger.info(f"Sending {len(features_list)} features for prediction...")
+            return client.predict(
+                features_json=json.dumps(features_list),
+                api_name="/predict"
+            )
+        
+        result_json_str = await asyncio.to_thread(_run_inference)
+        
+        predictions = json.loads(result_json_str).get("predictions", [])
+        logger.info(f"Received {len(predictions)} predictions from ML model.")
+            
+    except Exception as e:
+        logger.error(f"Error calling ML inference API: {e}", exc_info=True)
+        return False
+        
+    # --- PHASE 3: Write classification results back to DB (sync, separate session) ---
+    end_time = datetime.datetime.utcnow()
+    exec_time = (end_time - start_time).total_seconds() * 1000.0
+    
+    with SyncSessionLocal() as db:
+        hotspots = db.query(Hotspot).filter(Hotspot.id.in_(hotspot_data)).all()
+        hotspot_map = {h.id: h for h in hotspots}
+        
+        classified_count = 0
+        for i, hid in enumerate(hotspot_data):
             if i < len(predictions):
+                h = hotspot_map.get(hid)
+                if not h:
+                    continue
+                    
                 pred = predictions[i]
                 label_str = pred.get("label", "Unclassified")
                 ml_enum_val = enum_map.get(label_str, MLClassificationEnum.UNCLASSIFIED)
@@ -116,12 +129,15 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
                 h.ml_label = ml_enum_val
                 h.classification_confidence = float(pred.get("confidence", 0.0))
                 
+                if ml_enum_val != MLClassificationEnum.UNCLASSIFIED:
+                    classified_count += 1
+                
                 log = ClassificationLog(
                     hotspot_id=h.id,
                     model_version="v1.0",
                     predicted_label=ml_enum_val,
                     probability_scores=json.dumps(pred.get("probabilities", [])),
-                    execution_time_ms=exec_time / len(hotspots)
+                    execution_time_ms=exec_time / len(hotspot_data)
                 )
                 db.add(log)
                 
@@ -130,5 +146,5 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
                 
         db.commit()
         
-    logger.info(f"Processed and classified {len(hotspot_ids)} hotspots.")
+    logger.info(f"Processed and classified {len(hotspot_ids)} hotspots ({classified_count} non-unclassified).")
     return True
