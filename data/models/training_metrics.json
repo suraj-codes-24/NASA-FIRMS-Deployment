@@ -1,0 +1,206 @@
+{
+  "rf": {
+    "accuracy": 0.9995524194216817,
+    "macro_f1": 0.9896716019771382,
+    "industrial_fire_recall": 1.0,
+    "gas_flare_precision": 0.9936023622047244,
+    "classification_report": {
+      "Industrial Fire": {
+        "precision": 0.9796650717703349,
+        "recall": 1.0,
+        "f1-score": 0.9897280966767371,
+        "support": 819.0
+      },
+      "Gas Flare": {
+        "precision": 0.9936023622047244,
+        "recall": 0.9786718371303926,
+        "f1-score": 0.9860805860805861,
+        "support": 2063.0
+      },
+      "Agricultural Burn": {
+        "precision": 0.9997971876690103,
+        "recall": 1.0,
+        "f1-score": 0.9998985835502519,
+        "support": 44367.0
+      },
+      "Mining/Thermal": {
+        "precision": 0.9998646331558524,
+        "recall": 0.9998495946576023,
+        "f1-score": 0.9998571138501801,
+        "support": 132974.0
+      },
+      "Unclassified": {
+        "precision": 0.9682959048877147,
+        "recall": 0.9773333333333334,
+        "f1-score": 0.9727936297279363,
+        "support": 750.0
+      },
+      "accuracy": 0.9995524194216817,
+      "macro avg": {
+        "precision": 0.9882450319375273,
+        "recall": 0.9911709530242657,
+        "f1-score": 0.9896716019771382,
+        "support": 180973.0
+      },
+      "weighted avg": {
+        "precision": 0.99955446862378,
+        "recall": 0.9995524194216817,
+        "f1-score": 0.9995522376047604,
+        "support": 180973.0
+      }
+    }
+  },
+  "xgb": {
+    "accuracy": 0.9992761351140778,
+    "macro_f1": 0.9906962602365421,
+    "industrial_fire_recall": 1.0,
+    "gas_flare_precision": 0.9902818270165209,
+    "classification_report": {
+      "Industrial Fire": {
+        "precision": 0.984375,
+        "recall": 1.0,
+        "f1-score": 0.9921259842519685,
+        "support": 819.0
+      },
+      "Gas Flare": {
+        "precision": 0.9902818270165209,
+        "recall": 0.9878817256422685,
+        "f1-score": 0.9890803203106042,
+        "support": 2063.0
+      },
+      "Agricultural Burn": {
+        "precision": 0.9987613728492929,
+        "recall": 0.9995942930556495,
+        "f1-score": 0.9991776593707404,
+        "support": 44367.0
+      },
+      "Mining/Thermal": {
+        "precision": 0.9998495369499635,
+        "recall": 0.999466061034488,
+        "f1-score": 0.9996577622161965,
+        "support": 132974.0
+      },
+      "Unclassified": {
+        "precision": 0.9695767195767195,
+        "recall": 0.9773333333333334,
+        "f1-score": 0.9734395750332006,
+        "support": 750.0
+      },
+      "accuracy": 0.9992761351140778,
+      "macro avg": {
+        "precision": 0.9885688912784992,
+        "recall": 0.9928550826131479,
+        "f1-score": 0.9906962602365421,
+        "support": 180973.0
+      },
+      "weighted avg": {
+        "precision": 0.9992782085140139,
+        "recall": 0.9992761351140778,
+        "f1-score": 0.999276743212613,
+        "support": 180973.0
+      }
+    }
+  },
+  "lgbm": {
+    "accuracy": 0.5091146193078525,
+    "macro_f1": 0.34965528421265335,
+    "industrial_fire_recall": 0.9975579975579976,
+    "gas_flare_precision": 0.03259482279019537,
+    "classification_report": {
+      "Industrial Fire": {
+        "precision": 0.06815717026779011,
+        "recall": 0.9975579975579976,
+        "f1-score": 0.12759643916913946,
+        "support": 819.0
+      },
+      "Gas Flare": {
+        "precision": 0.03259482279019537,
+        "recall": 0.9655841008240427,
+        "f1-score": 0.06306092407046868,
+        "support": 2063.0
+      },
+      "Agricultural Burn": {
+        "precision": 0.9743025129962998,
+        "recall": 0.9673631302544684,
+        "f1-score": 0.9708204211812075,
+        "support": 44367.0
+      },
+      "Mining/Thermal": {
+        "precision": 0.9994313708336978,
+        "recall": 0.3436611668446463,
+        "f1-score": 0.5114550806388432,
+        "support": 132974.0
+      },
+      "Unclassified": {
+        "precision": 0.039233022047853235,
+        "recall": 0.9466666666666667,
+        "f1-score": 0.075343556003608,
+        "support": 750.0
+      },
+      "accuracy": 0.5091146193078525,
+      "macro avg": {
+        "precision": 0.42274377978716726,
+        "recall": 0.8441666124295641,
+        "f1-score": 0.34965528421265335,
+        "support": 180973.0
+      },
+      "weighted avg": {
+        "precision": 0.9740555514234077,
+        "recall": 0.5091146193078525,
+        "f1-score": 0.6154162298047541,
+        "support": 180973.0
+      }
+    }
+  },
+  "ensemble": {
+    "accuracy": 0.9994032258955756,
+    "macro_f1": 0.9893561701082796,
+    "industrial_fire_recall": 1.0,
+    "gas_flare_precision": 0.9840656687590535,
+    "classification_report": {
+      "Industrial Fire": {
+        "precision": 0.9761620977353993,
+        "recall": 1.0,
+        "f1-score": 0.9879372738238842,
+        "support": 819.0
+      },
+      "Gas Flare": {
+        "precision": 0.9840656687590535,
+        "recall": 0.9878817256422685,
+        "f1-score": 0.9859700048379294,
+        "support": 2063.0
+      },
+      "Agricultural Burn": {
+        "precision": 0.9993017703500158,
+        "recall": 1.0,
+        "f1-score": 0.9996507632512814,
+        "support": 44367.0
+      },
+      "Mining/Thermal": {
+        "precision": 1.0,
+        "recall": 0.9994961421029674,
+        "f1-score": 0.9997480075672951,
+        "support": 132974.0
+      },
+      "Unclassified": {
+        "precision": 0.9683377308707124,
+        "recall": 0.9786666666666667,
+        "f1-score": 0.9734748010610079,
+        "support": 750.0
+      },
+      "accuracy": 0.9994032258955756,
+      "macro avg": {
+        "precision": 0.9855734535430362,
+        "recall": 0.9932089068823805,
+        "f1-score": 0.9893561701082796,
+        "support": 180973.0
+      },
+      "weighted avg": {
+        "precision": 0.9994080839460439,
+        "recall": 0.9994032258955756,
+        "f1-score": 0.9994047720900979,
+        "support": 180973.0
+      }
+    }
+  }
+}

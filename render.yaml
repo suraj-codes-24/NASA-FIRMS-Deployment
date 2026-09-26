@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: ignis-api
+    env: python
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # Set in Render Dashboard from Neon
+      - key: DATABASE_URL_SYNC
+        sync: false
+      - key: HUGGINGFACE_INFERENCE_URL
+        sync: false # Set in Render Dashboard
+      - key: QSTASH_CURRENT_SIGNING_KEY
+        sync: false
+      - key: QSTASH_NEXT_SIGNING_KEY
+        sync: false
+      - key: FIRMS_MAP_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false # e.g. https://ignis-frontend.vercel.app
+
+  - type: web
+    name: ignis-frontend
+    env: node
+    buildCommand: "cd frontend && npm install && npm run build"
+    startCommand: "cd frontend && npm run start" # OR Deploy via Vercel for better performance
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: "https://ignis-api.onrender.com"

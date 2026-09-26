@@ -1,0 +1,133 @@
+# ============================================
+# IGNIS — Docker Compose (Development)
+# ============================================
+# 7 services as specified in §15.1:
+# nginx, frontend, backend, worker, scheduler, postgres, redis
+
+services:
+  # ----- PostgreSQL + PostGIS -----
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: ignis-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ignis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ignis_secure_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-ignis_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ignis} -d ${POSTGRES_DB:-ignis_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ----- Redis -----
+  redis:
+    image: redis:7-alpine
+    container_name: ignis-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ----- FastAPI Backend -----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ignis-backend
+    command: bash -c "python seed_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ----- Celery Worker -----
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ignis-worker
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=2
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ----- Celery Beat Scheduler -----
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ignis-scheduler
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ----- React Frontend (Vite dev server) -----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ignis-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
+      - VITE_WS_URL=ws://localhost:8000/ws
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    restart: unless-stopped
+
+  # ----- Nginx Reverse Proxy -----
+  nginx:
+    image: nginx:alpine
+    container_name: ignis-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    driver: local
+  redis_data:
+    driver: local

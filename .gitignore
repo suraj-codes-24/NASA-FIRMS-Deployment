@@ -1,0 +1,108 @@
+# ============================================
+# IGNIS .gitignore
+# ============================================
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ----- Virtual Environments -----
+.venv/
+venv/
+ENV/
+
+# ----- Environment Variables -----
+.env
+.env.local
+.env.*.local
+
+# ----- IDE -----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- Node.js / Frontend -----
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.npm
+*.tgz
+
+# ----- Data (large files, keep structure) -----
+data/raw/
+data/firms/
+data/osm/
+data/nightfire/
+data/landcover/
+data/processed/*.csv
+data/processed/*.parquet
+data/models/*.joblib
+data/models/*.onnx
+*.csv.gz
+# Keep sample data
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/models/.gitkeep
+
+# Training datasets (too large for git)
+data/ignis_training_dataset.csv
+data/ignis_training_dataset_v2.csv
+
+# ----- ML Models -----
+backend/app/ml/models/*.joblib
+backend/app/ml/models/*.pkl
+backend/app/ml/models/*.onnx
+!backend/app/ml/models/.gitkeep
+
+# ----- Jupyter Notebooks checkpoints -----
+.ipynb_checkpoints/
+
+# ----- Docker -----
+docker-compose.override.yml
+
+# ----- Logs & Background Tasks -----
+logs/
+*.log
+celerybeat-schedule*
+
+# ----- PostgreSQL data -----
+pgdata/
+
+# ----- Redis data -----
+redis_data/
+
+# ----- Reports -----
+reports/*.pdf
+reports/*.csv
+
+# ----- Coverage -----
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# ----- Dev Artifacts (internal planning docs) -----
+implementation_plan.md
+task.md
+PRE_PROJECT_DOCUMENT.html
+
+# ----- Pytest Cache -----
+.pytest_cache/

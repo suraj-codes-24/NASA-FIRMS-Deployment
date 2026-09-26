@@ -1,0 +1,190 @@
+/* ============================================
+   IGNIS — Global Styles & Design System
+   §9.4 Design Specification
+   ============================================ */
+
+/* ----- CSS Variables (Design Tokens) ----- */
+:root {
+  /* Background colors */
+  --bg-primary: #0a0e27;
+  --bg-card: #1a1f3a;
+  --bg-card-hover: #222847;
+  --bg-glass: rgba(26, 31, 58, 0.7);
+
+  /* Fire classification colors */
+  --color-industrial-fire: #e74c3c;
+  --color-forest-fire: #e67e22;
+  --color-gas-flare: #f1c40f;
+  --color-agricultural-burn: #2ecc71;
+  --color-mining-thermal: #3498db;
+  --color-unclassified: #95a5a6;
+
+  /* Accent */
+  --color-accent: #6c5ce7;
+  --color-accent-light: #a29bfe;
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.4);
+
+  /* Borders */
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-radius-card: 12px;
+  --border-radius-button: 8px;
+  --border-radius-badge: 20px;
+
+  /* Glassmorphism */
+  --glass-blur: blur(10px);
+  --glass-bg: rgba(26, 31, 58, 0.7);
+
+  /* Shadows */
+  --shadow-card: 0 4px 30px rgba(0, 0, 0, 0.3);
+  --shadow-glow-red: 0 0 20px rgba(231, 76, 60, 0.3);
+
+  /* Typography */
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Roboto', sans-serif;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* ----- Reset & Base ----- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  line-height: 1.3;
+}
+
+a {
+  color: var(--color-accent-light);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* ----- Glassmorphism Card ----- */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--border-radius-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ----- Active Fire Pulse Animation ----- */
+@keyframes fire-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
+}
+
+.pulse-fire {
+  animation: fire-pulse 2s infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.glow-active {
+  animation: glow-pulse 1.5s ease-in-out infinite;
+}
+
+/* ----- Classification Badge ----- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-badge);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-industrial-fire { background: rgba(231, 76, 60, 0.2); color: var(--color-industrial-fire); }
+.badge-forest-fire { background: rgba(230, 126, 34, 0.2); color: var(--color-forest-fire); }
+.badge-gas-flare { background: rgba(241, 196, 15, 0.2); color: var(--color-gas-flare); }
+.badge-agricultural-burn { background: rgba(46, 204, 113, 0.2); color: var(--color-agricultural-burn); }
+.badge-mining-thermal { background: rgba(52, 152, 219, 0.2); color: var(--color-mining-thermal); }
+.badge-unclassified { background: rgba(149, 165, 166, 0.2); color: var(--color-unclassified); }
+
+/* ----- Severity Badges ----- */
+.severity-critical { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+.severity-high { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
+.severity-medium { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+.severity-low { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+
+/* ----- Scrollbar ----- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ----- Utility Classes ----- */
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 16px; }
+.gap-lg { gap: 24px; }
