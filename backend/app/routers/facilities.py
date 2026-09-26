@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/facilities", tags=["Facilities"])
+router = APIRouter()
 
 @router.get("", response_model=List[FacilityResponse])
 async def get_facilities(

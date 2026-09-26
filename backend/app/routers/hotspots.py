@@ -14,7 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/hotspots", tags=["Hotspots"])
+router = APIRouter()
 
 @router.post("/ingest", status_code=202)
 async def ingest_hotspots(
