@@ -13,8 +13,11 @@ from app.config import settings
 
 
 # Async engine for FastAPI
+# asyncpg doesn't accept 'sslmode' kwarg, it uses 'ssl'
+async_db_url = settings.database_url.replace("sslmode=", "ssl=")
+
 async_engine = create_async_engine(
-    settings.database_url,
+    async_db_url,
     echo=settings.app_debug,
     pool_size=20,
     max_overflow=10,
