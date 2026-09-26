@@ -62,4 +62,85 @@ async def update_alert_notes(
     await db.commit()
     await db.refresh(alert)
     return alert
+@router.post("/seed-demo")
+async def seed_demo_data(db: AsyncSession = Depends(get_db)):
+    """Seed demo data for the hackathon presentation."""
+    from app.models.spatial import Facility, Hotspot, MLClassificationEnum
+    from geoalchemy2.elements import WKTElement
+    import datetime
+    
+    # Check if demo data already exists
+    query = await db.execute(select(Facility).where(Facility.name == "Demo Steel Plant"))
+    if query.scalars().first():
+        return {"message": "Demo data already seeded"}
+        
+    facility = Facility(
+        name="Demo Steel Plant",
+        facility_type="metal_smelting",
+        geom=WKTElement("POINT(86.2 22.8)", srid=4326),
+        state="Jharkhand",
+        district="Singhbhum"
+    )
+    db.add(facility)
+    await db.flush()
 
+    hotspot = Hotspot(
+        latitude=22.805,
+        longitude=86.205,
+        geom=WKTElement("POINT(86.205 22.805)", srid=4326),
+        brightness=350.5,
+        bright_t31=310.0,
+        frp=250.0,
+        confidence=100.0,
+        satellite="Terra",
+        instrument="MODIS",
+        daynight="D",
+        acq_date=datetime.datetime.utcnow(),
+        ml_label=MLClassificationEnum.INDUSTRIAL_FIRE,
+        classification_confidence=98.5,
+        nearest_facility_id=facility.id,
+        dist_to_industry_m=500.0
+    )
+    db.add(hotspot)
+    await db.flush()
+
+    alert = Alert(
+        hotspot_id=hotspot.id,
+        severity="CRITICAL",
+        status="NEW",
+        description="High-intensity thermal anomaly detected near Demo Steel Plant. Probable unrecorded flare or accident.",
+        created_at=datetime.datetime.utcnow()
+    )
+    db.add(alert)
+    
+    hotspot2 = Hotspot(
+        latitude=23.7,
+        longitude=86.4,
+        geom=WKTElement("POINT(86.4 23.7)", srid=4326),
+        brightness=340.0,
+        bright_t31=300.0,
+        frp=150.0,
+        confidence=90.0,
+        satellite="N",
+        instrument="VIIRS",
+        daynight="N",
+        acq_date=datetime.datetime.utcnow(),
+        ml_label=MLClassificationEnum.GAS_FLARE,
+        classification_confidence=92.0,
+        nearest_facility_id=facility.id,
+        dist_to_industry_m=2000.0
+    )
+    db.add(hotspot2)
+    await db.flush()
+
+    alert2 = Alert(
+        hotspot_id=hotspot2.id,
+        severity="HIGH",
+        status="INVESTIGATING",
+        description="Anomalous night-time thermal signature near industrial zone.",
+        created_at=datetime.datetime.utcnow()
+    )
+    db.add(alert2)
+
+    await db.commit()
+    return {"message": "Demo data seeded successfully!"}
