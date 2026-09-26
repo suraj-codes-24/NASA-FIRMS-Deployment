@@ -80,19 +80,23 @@ async def process_hotspots_batch(hotspot_ids: list[int]):
             
         # Call HuggingFace Gradio API
         try:
-            # Gradio API expects {"data": [input1, input2, ...]}
-            # For our endpoint, it's a single textbox input taking the JSON string
-            payload = {"data": [json.dumps(features_list)]}
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    f"{settings.huggingface_inference_url}",
-                    json=payload
-                )
-                response.raise_for_status()
-                result_data = response.json()
-                # Gradio returns output in "data" array
-                prediction_json = result_data.get("data", ["{}"])[0]
-                predictions = json.loads(prediction_json).get("predictions", [])
+            from gradio_client import Client
+            import ast
+            
+            # Use the HF URL without any /api/predict suffixes for the client
+            base_url = settings.huggingface_inference_url.replace('/api/predict', '').replace('/run/predict', '').replace('/gradio_api', '')
+            
+            # Run inference synchronously in an async wrapper (or run in threadpool, but predict is blocking)
+            client = Client(base_url)
+            
+            # predict returns the string of JSON directly
+            result_json_str = client.predict(
+                features_json=json.dumps(features_list),
+                api_name="/predict"
+            )
+            
+            # The result is already a JSON string containing {"predictions": [...]}
+            predictions = json.loads(result_json_str).get("predictions", [])
                 
         except Exception as e:
             logger.error(f"Error calling ML inference API: {e}")

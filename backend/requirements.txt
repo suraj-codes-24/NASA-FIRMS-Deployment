@@ -49,3 +49,4 @@ structlog==24.4.0
 
 # ----- Websocket -----
 websockets==14.1
+gradio_client==1.5.2
