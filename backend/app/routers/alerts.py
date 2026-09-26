@@ -75,6 +75,7 @@ async def seed_demo_data(db: AsyncSession = Depends(get_db)):
         return {"message": "Demo data already seeded"}
         
     facility = Facility(
+        osm_id="demo_12345",
         name="Demo Steel Plant",
         facility_type="metal_smelting",
         geom=WKTElement("POINT(86.2 22.8)", srid=4326),
@@ -106,9 +107,10 @@ async def seed_demo_data(db: AsyncSession = Depends(get_db)):
 
     alert = Alert(
         hotspot_id=hotspot.id,
+        alert_type="HIGH_FRP_INDUSTRIAL",
         severity="CRITICAL",
         status="NEW",
-        description="High-intensity thermal anomaly detected near Demo Steel Plant. Probable unrecorded flare or accident.",
+        resolution_note="High-intensity thermal anomaly detected near Demo Steel Plant. Probable unrecorded flare or accident.",
         created_at=datetime.datetime.utcnow()
     )
     db.add(alert)
@@ -135,9 +137,10 @@ async def seed_demo_data(db: AsyncSession = Depends(get_db)):
 
     alert2 = Alert(
         hotspot_id=hotspot2.id,
+        alert_type="NEW_GAS_FLARE",
         severity="HIGH",
         status="INVESTIGATING",
-        description="Anomalous night-time thermal signature near industrial zone.",
+        resolution_note="Anomalous night-time thermal signature near industrial zone.",
         created_at=datetime.datetime.utcnow()
     )
     db.add(alert2)
